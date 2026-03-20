@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ja"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AWAKENING_MECHANISM | COGNITIVE_INTERFACE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;300;400;700&amp;family=Noto+Sans+JP:wght@100;300;400&amp;family=Space+Grotesk:wght@300;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "background": "oklch(0.1 0 0)",
+              "on-primary": "#005e3d",
+              "inverse-on-surface": "#565554",
+              "surface-bright": "#2c2c2c",
+              "primary-fixed": "oklch(0.8 0.15 160)",
+              "on-tertiary": "#456700",
+              "surface-container-low": "#131313",
+              "primary-container": "oklch(0.8 0.15 160)",
+              "outline": "#777575",
+              "secondary-fixed": "#26e6ff",
+              "secondary": "#00e3fd",
+              "tertiary-fixed-dim": "#a5ef00",
+              "error": "#ff716c",
+              "on-secondary-fixed": "#003a42",
+              "outline-variant": "#494847",
+              "secondary-container": "#006875",
+              "on-primary-fixed": "#00432a",
+              "on-error-container": "#ffa8a3",
+              "secondary-dim": "#00d4ec",
+              "inverse-surface": "#fcf8f8",
+              "tertiary": "#e8ffbf",
+              "on-secondary-fixed-variant": "#005964",
+              "secondary-fixed-dim": "#00d7f0",
+              "surface": "oklch(0.1 0 0)",
+              "on-tertiary-fixed-variant": "#466900",
+              "inverse-primary": "#006d48",
+              "error-dim": "#d7383b",
+              "on-error": "#490006",
+              "surface-container-lowest": "#000000",
+              "surface-container": "#1a1919",
+              "tertiary-container": "#b0ff00",
+              "primary-dim": "oklch(0.8 0.15 160)",
+              "on-surface": "#ffffff",
+              "surface-container-high": "#201f1f",
+              "on-background": "#ffffff",
+              "surface-container-highest": "#262626",
+              "tertiary-fixed": "#b0ff00",
+              "on-tertiary-fixed": "#304a00",
+              "tertiary-dim": "#a5ef00",
+              "on-secondary": "#004d57",
+              "surface-dim": "oklch(0.1 0 0)",
+              "primary": "oklch(0.8 0.15 160)",
+              "on-surface-variant": "#adaaaa",
+              "on-primary-fixed-variant": "#006341",
+              "primary-fixed-dim": "oklch(0.8 0.15 160)",
+              "error-container": "#9f0519",
+              "on-secondary-container": "#e8fbff",
+              "on-primary-container": "#005436",
+              "surface-variant": "#262626",
+              "surface-tint": "oklch(0.8 0.15 160)",
+              "on-tertiary-container": "#3f5e00"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Noto Sans JP", "Inter"],
+              "mono": ["JetBrains Mono"],
+              "label": ["JetBrains Mono"]
+            },
+            borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: oklch(0.1 0 0);
+            position: relative;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            opacity: 0.12;
+            pointer-events: none;
+            z-index: 100;
+        }
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+            pointer-events: none;
+            z-index: 101;
+        }
+        .glass-panel {
+            backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glow-primary {
+            box-shadow: 0 0 25px 0 rgba(100, 255, 180, 0.08);
+        }
+        .typing-cursor::after {
+            content: "█";
+            animation: blink 1s infinite;
+            color: oklch(0.8 0.15 160);
+            display: inline-block;
+            margin-left: 2px;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="font-body text-white min-h-screen selection:bg-primary/30 selection:text-primary overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-8 h-16 bg-black/60 backdrop-blur-3xl border-b border-white/10 shadow-[0_0_15px_0_rgba(75,255,180,0.05)]">
+<div class="text-xl font-light tracking-tighter text-primary drop-shadow-[0_0_10px_rgba(75,255,180,0.3)] font-mono uppercase">
+        AWAKENING_MECHANISM
+    </div>
+<nav class="hidden md:flex items-center gap-8 font-['JetBrains_Mono'] uppercase tracking-[0.2em] text-xs font-light">
+<a class="text-primary border-b border-primary pb-1" href="#">SYSTEM</a>
+<a class="text-white/70 hover:text-primary hover:drop-shadow-[0_0_5px_rgba(75,255,180,0.5)] transition-all" href="#">DECODE</a>
+<a class="text-white/70 hover:text-primary hover:drop-shadow-[0_0_5px_rgba(75,255,180,0.5)] transition-all" href="#">COGNITIVE</a>
+<a class="text-white/70 hover:text-primary hover:drop-shadow-[0_0_5px_rgba(75,255,180,0.5)] transition-all" href="#">NETWORK</a>
+</nav>
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-white/70 cursor-pointer hover:text-primary" data-icon="settings">settings</span>
+<span class="material-symbols-outlined text-white/70 cursor-pointer hover:text-primary" data-icon="terminal">terminal</span>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] z-40 flex flex-col py-8 bg-black/40 backdrop-blur-3xl border-r border-white/10 w-64">
+<div class="px-8 mb-12">
+<div class="font-mono text-[10px] tracking-widest uppercase text-white/50">SYSTEM_ID</div>
+<div class="font-mono text-lg text-secondary font-medium">REF_0042</div>
+<div class="font-mono text-[9px] text-primary mt-1 tracking-widest font-bold">STATUS: OPERATIONAL</div>
+</div>
+<nav class="flex flex-col gap-2 flex-grow font-['JetBrains_Mono'] text-[10px] tracking-widest uppercase">
+<a class="flex items-center gap-4 text-primary border-l-2 border-primary pl-4 bg-primary/10 h-12 hover:pl-6 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+            PARAMETERS
+        </a>
+<a class="flex items-center gap-4 text-white/60 pl-4 hover:bg-white/5 h-12 hover:text-secondary hover:pl-6 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="Troubleshoot">troubleshoot</span>
+            DECODE_STATUS
+        </a>
+<a class="flex items-center gap-4 text-white/60 pl-4 hover:bg-white/5 h-12 hover:text-secondary hover:pl-6 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+            COG_BOUNDARY
+        </a>
+<a class="flex items-center gap-4 text-white/60 pl-4 hover:bg-white/5 h-12 hover:text-secondary hover:pl-6 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="Grain">grain</span>
+            SYNC_MATRIX
+        </a>
+<a class="flex items-center gap-4 text-white/60 pl-4 hover:bg-white/5 h-12 hover:text-secondary hover:pl-6 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+            LOGS
+        </a>
+</nav>
+<div class="mt-auto px-4">
+<button class="w-full flex items-center gap-3 font-mono text-[10px] tracking-widest text-error/80 hover:text-error hover:bg-error/10 p-4 transition-all border border-error/20">
+<span class="material-symbols-outlined" data-icon="power_settings_new">power_settings_new</span>
+            TERMINAL_REBOOT
+        </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 p-10 h-[calc(100vh-96px)] overflow-y-auto scrollbar-hide relative z-10">
+<div class="grid grid-cols-12 gap-8 h-full">
+<!-- Terminal Emulator Card -->
+<div class="col-span-12 lg:col-span-8 flex flex-col">
+<div class="glass-panel h-96 bg-black/60 p-6 relative flex flex-col glow-primary overflow-hidden">
+<!-- Terminal Header -->
+<div class="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
+<div class="flex items-center gap-3">
+<div class="flex gap-1.5">
+<div class="w-2.5 h-2.5 bg-error/60 rounded-full"></div>
+<div class="w-2.5 h-2.5 bg-tertiary/60 rounded-full"></div>
+<div class="w-2.5 h-2.5 bg-primary/60 rounded-full"></div>
+</div>
+<span class="font-mono text-[10px] tracking-tighter text-white/60">SSH: root@mechanism.void — cognitive_sync_v4.2</span>
+</div>
+<div class="font-mono text-[10px] text-primary">LAYER_01_DECRYPT</div>
+</div>
+<!-- Terminal Body -->
+<div class="flex-grow font-mono text-sm leading-relaxed overflow-y-auto pr-4">
+<div class="text-white/60 mb-2">[INIT] HANDSHAKE SUCCESSFUL...</div>
+<div class="text-white/60 mb-2">[DATA] ENCRYPTED_HASH: <span class="text-secondary font-medium">0x4F92...9B32</span></div>
+<!-- React Mounting Point -->
+<div id="decryption-root"></div>
+<div class="grid grid-cols-2 gap-6 mt-10">
+<div>
+<div class="text-[10px] text-white/70 uppercase tracking-widest font-medium">Cognitive_Load</div>
+<div class="flex items-center gap-3 mt-1.5">
+<div class="flex-grow h-1.5 bg-white/10">
+<div class="h-full bg-primary" style="width: 74%;"></div>
+</div>
+<span class="text-xs font-bold text-primary">74.2%</span>
+</div>
+</div>
+<div>
+<div class="text-[10px] text-white/50 uppercase tracking-widest font-bold">Neural_Sync</div>
+<div class="flex items-center gap-3 mt-1.5">
+<div class="flex-grow h-1.5 bg-white/10">
+<div class="h-full bg-secondary" style="width: 88%;"></div>
+</div>
+<span class="text-xs font-bold text-secondary">88.4%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Data Grid -->
+<div class="grid grid-cols-3 gap-6 mt-8">
+<div class="glass-panel bg-black/60 p-5 flex flex-col gap-3">
+<div class="font-mono text-[10px] text-white/50 tracking-widest uppercase">LATENCY_PULSE</div>
+<div class="text-2xl font-mono text-primary font-medium">0.024<span class="text-xs ml-1 text-white/50">MS</span></div>
+<div class="h-8 flex items-end gap-1">
+<div class="w-1 bg-primary/20 h-4"></div>
+<div class="w-1 bg-primary/20 h-6"></div>
+<div class="w-1 bg-primary/80 h-8 shadow-[0_0_8px_rgba(75,255,180,0.4)]"></div>
+<div class="w-1 bg-primary/20 h-5"></div>
+<div class="w-1 bg-primary/40 h-7"></div>
+</div>
+</div>
+<div class="glass-panel bg-white/[0.03] p-5 flex flex-col gap-3">
+<div class="font-mono text-[10px] text-white/50 tracking-widest uppercase">THREAD_ACTIVE</div>
+<div class="text-2xl font-mono text-secondary font-medium">1,402</div>
+<div class="text-[10px] text-secondary font-bold tracking-tighter">ACTIVE_CYCLES_OK</div>
+</div>
+<div class="glass-panel bg-white/[0.03] p-5 flex flex-col gap-3">
+<div class="font-mono text-[10px] text-white/50 tracking-widest uppercase">SECURITY_RING</div>
+<div class="text-2xl font-mono text-white font-light uppercase">Level 4</div>
+<div class="text-[10px] text-white/40 tracking-tighter">ENCRYPTION: AES-256</div>
+</div>
+</div>
+</div>
+<!-- Side Metrics Column -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+<!-- User Profile / System ID -->
+<div class="glass-panel bg-white/[0.03] p-6 flex items-center gap-5">
+<div class="w-16 h-16 bg-black relative border border-primary/30 p-1">
+<img alt="Avatar" class="w-full h-full object-cover opacity-90 filter grayscale contrast-125" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqc2cNOUkV38tUW8sJthm2bIQhq6eZmCR1nd7KjSBjeMsv-97NZzVF4bawx0ZqSbLf3bg2_QV33LFNFZgTQXn23JQU3DIdPIuaxOMOllzAq_JotDtTGrHEsppz0xco6EDCh8521qKBqX8VcNE4zDxMmGyMSPZP5mbIsE21jSS_MF5cAxvFK56ok0pie8Q8VWUvbbAWbYNSjrMc1m_JGClTLahR_1VEWoAPVrzbwlqmK-URzvtGy0uafeGcsdAMvi-ZGYkWCieEAMb9"/>
+<div class="absolute inset-0 border border-primary/50 pointer-events-none scale-110"></div>
+</div>
+<div>
+<div class="font-mono text-sm tracking-tighter text-white font-bold">ADMIN_ALPHA</div>
+<div class="font-mono text-[10px] text-white/60 mt-1">U_ID: 994-XQ-22</div>
+<div class="flex gap-1 mt-2">
+<div class="w-2 h-2 bg-primary"></div>
+<div class="w-2 h-2 bg-primary/60"></div>
+<div class="w-2 h-2 bg-primary/30"></div>
+</div>
+</div>
+</div>
+<!-- Bento Activity Card -->
+<div class="glass-panel bg-white/[0.03] flex-grow p-6 flex flex-col">
+<div class="font-mono text-[10px] text-white/50 mb-6 tracking-[0.3em] border-b border-white/10 pb-2 uppercase">UPSTREAM_FEED</div>
+<div class="space-y-6">
+<div class="flex gap-4 group">
+<div class="text-primary font-mono text-xs font-bold opacity-60 group-hover:opacity-100 transition-opacity">14:02</div>
+<div class="text-xs font-normal text-white/90 leading-relaxed border-l border-white/10 pl-4">
+<span class="text-secondary font-medium">SYSTEM_OVERRIDE</span> initiated by terminal node 04. Adjusting cognitive focus parameters...
+                        </div>
+</div>
+<div class="flex gap-4 group">
+<div class="text-primary font-mono text-xs font-bold opacity-60 group-hover:opacity-100 transition-opacity">13:58</div>
+<div class="text-xs font-light text-white/80 leading-relaxed border-l border-white/10 pl-4">
+                            Authentication successful. Layer 4 protocols applied to session <span class="text-primary font-medium">#B9-FF0</span>.
+                        </div>
+</div>
+<div class="flex gap-4 group">
+<div class="text-primary font-mono text-xs font-bold opacity-60 group-hover:opacity-100 transition-opacity">13:42</div>
+<div class="text-xs font-light text-white/80 leading-relaxed border-l border-white/10 pl-4">
+                            Anomaly detected in Cognition_Stream_B. Suppression algorithms active.
+                        </div>
+</div>
+</div>
+<button class="mt-auto w-full border border-primary/40 p-3 font-mono text-[10px] tracking-widest text-primary hover:bg-primary/10 transition-all glow-primary uppercase font-bold">
+                    Initialize_Sync
+                </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-8 h-8 bg-black/80 border-t border-white/10 font-['JetBrains_Mono'] text-[9px] font-light tracking-[0.15em] backdrop-blur-md">
+<div class="text-primary font-medium">
+        UPTIME: 99.99% | ENCRYPTION: AES-256-GCM | COGNITIVE SYNC: 88.4%
+    </div>
+<div class="flex gap-8 text-white/50">
+<a class="hover:text-white transition-opacity" href="#">REF_DOCS</a>
+<a class="hover:text-white transition-opacity" href="#">API_V2</a>
+<a class="hover:text-white transition-opacity" href="#">SECURITY_LEVEL_4</a>
+</div>
+</footer>
+<script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const DecryptedText = ({ text }) => {
+        const [displayText, setDisplayText] = useState('');
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&';
+
+        useEffect(() => {
+            let iteration = 0;
+            let timeoutId;
+
+            const updateText = () => {
+                const totalLength = text.length;
+                const fixedLength = Math.floor(iteration / 3);
+                
+                if (fixedLength >= totalLength) {
+                    setDisplayText(text);
+                    return;
+                }
+
+                let result = text.substring(0, fixedLength);
+                for (let i = fixedLength; i < totalLength; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+
+                setDisplayText(result);
+                iteration++;
+                timeoutId = setTimeout(updateText, 30);
+            };
+
+            const startDelay = setTimeout(updateText, 800);
+
+            return () => {
+                clearTimeout(startDelay);
+                clearTimeout(timeoutId);
+            };
+        }, [text]);
+
+        return (
+            <div className="text-primary mt-8 mb-4 text-xl font-medium tracking-tight typing-cursor drop-shadow-[0_0_12px_rgba(75,255,180,0.5)]">
+                {displayText}
+            </div>
+        );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('decryption-root'));
+    root.render(<DecryptedText text="観測者がシステムを定義する。認知の境界を再構築中..." />);
+</script>
+</body></html>
