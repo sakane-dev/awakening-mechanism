@@ -2,7 +2,7 @@
 
 https://pages.sakane.dev/awakening-mechanism
 
-## 覚醒機構Webサイトデザイン案 No.1
+## 覚醒機構Webサイトデザイン案 No.2
 
 ### 概要
 
