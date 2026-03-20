@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>覚醒機構 - Cognitive Architecture</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300&family=Noto+Sans+JP:wght@300&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: oklch(0.12 0.01 260);
+            --bg-glass: oklch(0.18 0.02 260 / 0.4);
+            --border-glass: oklch(0.95 0.01 260 / 0.15);
+            
+            --text-primary: oklch(0.85 0.18 160);
+            --text-secondary: oklch(0.70 0.05 260);
+            --text-alert: oklch(0.70 0.15 25);
+            
+            --font-sys: 'JetBrains Mono', monospace;
+            --font-ja: 'Noto Sans JP', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-weight: 300 !important;
+        }
+
+        body, html {
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-base);
+            background-image: radial-gradient(circle at 50% 50%, oklch(0.15 0.05 160 / 0.2) 0%, transparent 60%);
+            color: var(--text-primary);
+            font-family: var(--font-sys);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .terminal-container {
+            width: 90vw;
+            max-width: 1000px;
+            height: 70vh;
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            box-shadow: 0 0 40px oklch(0.85 0.18 160 / 0.1), inset 0 0 20px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 10;
+        }
+
+        .terminal-header {
+            height: 2.5rem;
+            border-bottom: 1px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .terminal-body {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        .line {
+            display: flex;
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeUp 0.4s ease forwards;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .prompt::before {
+            content: "root@kakusei-kikou:~#";
+            color: var(--text-secondary);
+            margin-right: 1rem;
+        }
+
+        .text-ja {
+            font-family: var(--font-ja);
+            letter-spacing: 0.05em;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.2em;
+            background-color: var(--text-primary);
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .glow-text {
+            text-shadow: 0 0 10px var(--text-primary);
+        }
+        
+        .action-panel {
+            margin-top: 3rem;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .action-card {
+            border: 1px solid var(--border-glass);
+            padding: 1.5rem;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, oklch(0.85 0.18 160 / 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .action-card:hover::before {
+            left: 100%;
+        }
+
+        .action-card:hover {
+            border-color: var(--text-primary);
+            box-shadow: 0 0 15px oklch(0.85 0.18 160 / 0.2);
+        }
+
+        .card-title {
+            font-family: var(--font-sys);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .card-desc {
+            font-family: var(--font-ja);
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="crt-overlay"></div>
+
+    <div class="terminal-container">
+        <div class="terminal-header">
+            AUTH_PROTOCOL: ACTIVE | NODE: KAKUSEI_KIKOU_CORE
+        </div>
+        <div class="terminal-body" id="terminal">
+            </div>
+    </div>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        
+        const bootSequence = [
+            { text: "Initializing cognitive framework...", type: "sys", delay: 400 },
+            { text: "Loading linguistic philosophy modules...", type: "sys", delay: 300 },
+            { text: "Calibrating observer parameters...", type: "sys", delay: 500 },
+            { text: "System online.", type: "sys", delay: 200 },
+            { text: "EXECUTE: /bin/kakusei --mode=concept", type: "prompt", delay: 700 },
+            { text: "観測者がシステムを定義する。認知の境界を再構築中...", type: "ja", delay: 1400 },
+            { text: "AI共創ソリューション、言語論的コンサルティングプロセスをロード完了。", type: "ja", delay: 1000 }
+        ];
+
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&';
+
+        function getRandomChar() {
+            return chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        async function typeText(element, text, isJa) {
+            let currentText = '';
+            const length = text.length;
+            
+            for (let i = 0; i < length; i++) {
+                // デコードエフェクト：実際の文字が表示される前に数回ランダムな文字を表示
+                if (isJa) {
+                    for(let j=0; j<2; j++){
+                        element.textContent = currentText + getRandomChar();
+                        await new Promise(r => setTimeout(r, 20));
+                    }
+                }
+                
+                currentText += text[i];
+                element.textContent = currentText;
+                
+                // タイプスピードの揺らぎ
+                const typeSpeed = isJa ? 50 + Math.random() * 50 : 20 + Math.random() * 30;
+                await new Promise(r => setTimeout(r, typeSpeed));
+            }
+        }
+
+        async function runBootSequence() {
+            for (const step of bootSequence) {
+                const line = document.createElement('div');
+                line.className = 'line';
+                if (step.type === 'prompt') line.classList.add('prompt');
+                if (step.type === 'ja') line.classList.add('text-ja');
+                if (step.type === 'sys') line.style.color = 'var(--text-secondary)';
+                
+                const textSpan = document.createElement('span');
+                if (step.type === 'ja' || step.type === 'prompt') textSpan.classList.add('glow-text');
+                
+                const cursor = document.createElement('span');
+                cursor.className = 'cursor';
+                
+                line.appendChild(textSpan);
+                line.appendChild(cursor);
+                terminal.appendChild(line);
+
+                await new Promise(r => setTimeout(r, step.delay));
+                await typeText(textSpan, step.text, step.type === 'ja');
+                
+                cursor.remove();
+            }
+
+            // シーケンス終了後、アクションパネルを表示
+            showActionPanel();
+        }
+
+        function showActionPanel() {
+            const panel = document.createElement('div');
+            panel.className = 'action-panel';
+            
+            const card1 = document.createElement('div');
+            card1.className = 'action-card';
+            card1.innerHTML = '<div class="card-title">MODULE 01: Consulting</div><div class="card-desc">認知科学に基づく組織アーキテクチャ再設計</div>';
+            
+            const card2 = document.createElement('div');
+            card2.className = 'action-card';
+            card2.innerHTML = '<div class="card-title">MODULE 02: SaaS Development</div><div class="card-desc">言語哲学的視座によるAIエージェント統合</div>';
+
+            panel.appendChild(card1);
+            panel.appendChild(card2);
+            terminal.appendChild(panel);
+
+            // リフローを強制してから透明度を変更
+            void panel.offsetWidth;
+            panel.style.opacity = 1;
+            
+            // 最終的な入力プロンプトを追加
+            setTimeout(() => {
+                const finalLine = document.createElement('div');
+                finalLine.className = 'line prompt';
+                const cursor = document.createElement('span');
+                cursor.className = 'cursor';
+                finalLine.appendChild(cursor);
+                terminal.appendChild(finalLine);
+            }, 1000);
+        }
+
+        // 初期化
+        window.onload = () => {
+            setTimeout(runBootSequence, 1000);
+        };
+    </script>
+</body>
+</html>
